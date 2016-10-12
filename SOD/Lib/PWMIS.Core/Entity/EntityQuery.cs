@@ -1048,7 +1048,7 @@ namespace PWMIS.DataMap.Entity
                         //        ((IDbDataParameter)paras[index]).Size = size;
                         //    }
                         //}
-                        EntityQuery.SetParameterSize(paras[index], entity, field,db);
+                        EntityQuery.SetParameterSize(ref paras[index], entity, field,db);
 
                         index++;
                     }
@@ -1735,7 +1735,7 @@ namespace PWMIS.DataMap.Entity
         #endregion
 
         #region 程序集内部静态方法
-        internal static void SetParameterSize(IDataParameter para, EntityBase entity, string field, CommonDB DB)
+        internal static void SetParameterSize(ref IDataParameter para, EntityBase entity, string field, CommonDB DB)
         {
             if (para.Value != null && para.Value.GetType() == typeof(string))
             {
@@ -1746,7 +1746,10 @@ namespace PWMIS.DataMap.Entity
                     //感谢网友 【不抖机灵】 发现此问题 2016.4.29
                     //((IDbDataParameter)para).Size = size;
                     //((IDbDataParameter)para).DbType = DbType.String;
-                    para = DB.GetParameter(para.ParameterName, DbType.String, size);
+                    //需要为新参数赋值，感谢网友 @广州-银古 发现此问题
+                   var  paratemp = DB.GetParameter(para.ParameterName, DbType.String, size);
+                   paratemp.Value = para.Value;
+                   para = paratemp;
                     
                 }
                 else if (size < 0)
@@ -1755,7 +1758,9 @@ namespace PWMIS.DataMap.Entity
                     ////DbType.AnsiString 非Unicode字符可变长度流，范围为1-8000个字符
                     ////长度小于0，将生成 varchar的参数类型
                     //((IDbDataParameter)para).DbType = DbType.AnsiString;
-                    para = DB.GetParameter(para.ParameterName, DbType.AnsiString, Math.Abs(size));
+                    var paratemp = DB.GetParameter(para.ParameterName, DbType.AnsiString, Math.Abs(size));
+                    paratemp.Value = para.Value;
+                    para = paratemp;
                 }
             }
         }
@@ -1934,7 +1939,7 @@ namespace PWMIS.DataMap.Entity
                     if (fieldType == typeof(string) && paras[index].Value != null)
                         //为字符串类型的参数指定长度 edit at 2012.4.23
                         //((IDbDataParameter)paras[index]).Size = entity.GetStringFieldSize(field);
-                         SetParameterSize(paras[index], entity, field,DB);
+                         SetParameterSize(ref paras[index], entity, field,DB);
                     else if (fieldType == typeof(byte[]))
                         //为字节类型指定转换类型，防止空值时被当作字符串类型
                         paras[index].DbType = DbType.Binary;
@@ -2008,7 +2013,7 @@ namespace PWMIS.DataMap.Entity
                 if (fieldType == typeof(string) && paras[index].Value != null)
                     //为字符串类型的参数指定长度 edit at 2012.4.23
                     //((IDbDataParameter)paras[index]).Size = entity.GetStringFieldSize(field);
-                    SetParameterSize(paras[index], entity, field,DB);
+                    SetParameterSize(ref paras[index], entity, field,DB);
                 else if (fieldType == typeof(byte[]))
                     //为字节类型指定转换类型，防止空值时被当作字符串类型
                     paras[index].DbType = DbType.Binary;
@@ -2029,7 +2034,7 @@ namespace PWMIS.DataMap.Entity
                 if (fieldType == typeof(string) && paras[index].Value != null)
                     //为字符串类型的参数指定长度 edit at 2012.4.23
                     //((IDbDataParameter)paras[index]).Size = entity.GetStringFieldSize(field);
-                    SetParameterSize(paras[index], entity, field,DB);
+                    SetParameterSize(ref paras[index], entity, field,DB);
                 else if (fieldType == typeof(byte[]))
                     //为字节类型指定转换类型，防止空值时被当作字符串类型
                     paras[index].DbType = DbType.Binary;
@@ -2051,7 +2056,7 @@ namespace PWMIS.DataMap.Entity
                     if (fieldType == typeof(string) && paras[index].Value != null)
                         //为字符串类型的参数指定长度 edit at 2012.4.23
                         //((IDbDataParameter)paras[index]).Size = entity.GetStringFieldSize(key);
-                        SetParameterSize(paras[index], entity, key,DB);
+                        SetParameterSize(ref paras[index], entity, key,DB);
                     else if (fieldType == typeof(byte[]))
                         //为字节类型指定转换类型，防止空值时被当作字符串类型
                         paras[index].DbType = DbType.Binary;
